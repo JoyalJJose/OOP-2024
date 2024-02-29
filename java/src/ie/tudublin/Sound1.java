@@ -2,6 +2,7 @@ package ie.tudublin;
 
 import ddf.minim.Minim;
 import ddf.minim.AudioInput;
+import ddf.minim.AudioPlayer;
 import ddf.minim.AudioBuffer;
 import processing.core.PApplet;
 
@@ -9,8 +10,13 @@ import processing.core.PApplet;
 public class Sound1 extends PApplet {
 
     Minim m;
-    AudioInput ai;
     AudioBuffer b;
+
+    // Mic input
+    // AudioInput ai;
+
+    // Loading files and playing them
+    AudioPlayer ap;
 
     public void settings() {
         size(800, 600);
@@ -18,11 +24,17 @@ public class Sound1 extends PApplet {
 
     public void setup() {
         m = new Minim(this);
-        ai = m.getLineIn(Minim.MONO, width, 44100, 16);
-        b = ai.mix;
+        // ai = m.getLineIn(Minim.MONO, width, 44100, 16);
+        ap = m.loadFile("java\\data\\tomp3.cc - 08 PsychNerD and Marco G  More Cowbell.mp3");
+        ap.play();
+        b = ap.mix;
     }
 
-    public void draw() {
+    float y = 400;
+    float lerpedAvg;
+
+    public void draw()
+    {
         colorMode(HSB);
         background(0);
         stroke(255);
@@ -37,10 +49,34 @@ public class Sound1 extends PApplet {
             // line(i, h, i, h + b.get(i) * h);
 
             // Drawing circles of differing radii at centre line
-            noFill();
-            circle(i, h, b.get(i) * h);
+            // noFill();
+            // circle(i, h, b.get(i) * h);
         }
 
+        // Getting avg amplitude (loudness) of samples in buffer
+        float total = 0;
+        for (int i = 0; i < b.size(); i++) {
+            total += abs(b.get(i));
+        }
+        float avg = total / b.size();
+
+        lerpedAvg = lerp(lerpedAvg, avg, 0.1f);
+
+        // Drawing circle with avg
+        noFill();
+        circle(h, h, avg * h * 5);
+        stroke(250, 255, 255);
+        circle(h * 0.5f, h, lerpedAvg * h * 5);
+
+        circle(h, y, 50);
+        y += random(-10, 10);
+
+        lerped = lerp(lerped, y, 0.1f);
+        stroke(100, 255, 255);
+        circle(h + 200, lerped, 50);
+
     }
+
+    float lerped = 0;
 
 }
